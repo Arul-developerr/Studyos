@@ -1,0 +1,125 @@
+/* Shared type theme. This application uses CSS, without a Tailwind runtime. */
+:root {
+  --text-8: 0.5rem;
+  --text-9: 0.5625rem;
+  --text-10: 0.625rem;
+  --text-11: 0.6875rem;
+  --text-12: 0.75rem;
+  --text-13: 0.8125rem;
+  --text-14: 0.875rem;
+  --text-16: 1rem;
+  --text-18: 1.125rem;
+  --text-20: 1.25rem;
+  --text-24: 1.5rem;
+  --text-28: 1.75rem;
+  --text-32: 2rem;
+  --text-36: 2.25rem;
+  --text-40: 2.5rem;
+  --text-48: 3rem;
+  --text-56: 3.5rem;
+  --text-64: 4rem;
+  --text-80: 5rem;
+
+  --font-sans: 'Manrope', sans-serif;
+  --type-caption: 0.6875rem;
+  --type-small: 0.75rem;
+  --type-control: 0.8125rem;
+  --type-body: 0.875rem;
+  --type-section: 1rem;
+  --type-subheading: 1.25rem;
+  --type-title: 2rem;
+  --type-metric: 1.75rem;
+  --weight-body: 400;
+  --weight-label: 500;
+  --weight-heading: 600;
+  --weight-title: 700;
+  --weight-metric: 800;
+  font-family: var(--font-sans);
+  font-weight: var(--weight-body);
+  font-synthesis: none;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+body, #root, button, input, select, textarea, option, optgroup, table, code, pre, kbd,
+.recharts-wrapper, .recharts-default-tooltip, .recharts-tooltip-wrapper,
+svg text, svg tspan {
+  font-family: var(--font-sans);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+body { font-size: var(--type-body); font-weight: var(--weight-body); }
+p, textarea { font-weight: var(--weight-body); line-height: 1.5; letter-spacing: 0; }
+button, .btn, .text-link { font-weight: var(--weight-heading); letter-spacing: 0; line-height: 1.4; }
+input, select, textarea { font-size: var(--type-control); }
+input, select, label, th, nav, .nav-link, .nav-link.active { font-weight: var(--weight-label); }
+label { line-height: 1.4; letter-spacing: 0; }
+b, strong { font-weight: var(--weight-heading); }
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-sans); font-style: normal; }
+h1, .page-heading h1, .app-main main .page-heading h1,
+.rr-heading h1, .rr-achievements .rr-heading h1, .rr-resources .rr-heading h1,
+.rx-agent .rr-heading h1, .rx-memory-hero .rr-heading h1,
+.rx-tasks > .page-heading h1, .ref-greeting h1, .ref-planner-title h1,
+.ref-profile-hero h1 {
+  font-size: var(--type-title) !important;
+  font-weight: var(--weight-title);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+h2, .card-head h2, .ref-panel-head h2, .ref-dashboard .ref-panel-head h2,
+.ref-profile .ref-panel-head h2, .ref-side-head h2, .rr-panel h2 {
+  font-size: var(--type-section);
+  font-weight: var(--weight-heading);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+h3, h4, h5, h6 { font-weight: var(--weight-heading); line-height: 1.35; letter-spacing: -0.01em; }
+.page-heading p, .rr-heading p, .ref-planner-title p {
+  font-size: var(--type-body); font-weight: var(--weight-body); line-height: 1.5;
+}
+.nav-link, .nav-link.active { font-size: var(--type-control); line-height: 1.4; letter-spacing: 0; }
+.eyebrow, .sidebar-caption, .breadcrumb, .ref-student-pill {
+  font-size: var(--type-caption); font-weight: var(--weight-label); line-height: 1.4; letter-spacing: 0.08em;
+}
+.metric strong, .metric-grid strong, .rr-summary b, .ref-tile b,
+.ref-profile-stats b, .ref-planner-summary strong, .goal-big strong,
+.readiness-score strong, .proposal-compare strong, .ref-streak strong,
+.capacity strong, .rr-ring b {
+  font-weight: var(--weight-metric); line-height: 1.15; letter-spacing: -0.025em;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.metric strong, .rr-summary b, .ref-tile b { font-size: var(--type-metric); }
+.goal-big strong, .readiness-score strong, .proposal-compare strong,
+.ref-streak strong, .capacity strong { font-size: 2.25rem; }
+.focus-ring strong, .rx-focus .focus-ring strong {
+  font-size: 3.5rem; font-weight: var(--weight-metric); line-height: 1.1; letter-spacing: -0.035em;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.brand b, .landing-logo b { font-weight: var(--weight-title); font-size: 1.5rem; line-height: 1.1; letter-spacing: 0.025em; }
+.brand small, .landing-logo small { font-weight: var(--weight-label); letter-spacing: 0.02em; line-height: 1.4; }
+.brand-mark { font-style: normal; }
+.landing h1 { font-size: clamp(2.5rem, 4.5vw, 4rem) !important; line-height: 1.1; }
+.auth h1, .onboard-side h1 { font-size: clamp(2.25rem, 3.6vw, 3.25rem) !important; line-height: 1.15; }
+.landing h1 em, .auth h1 em, .onboarding h1 em, .landing h2 em { font-weight: inherit; font-style: normal; }
+.auth-form h2, .onboard-card h2, .landing h2 { font-size: clamp(1.5rem, 2.5vw, 2rem); font-weight: var(--weight-title); line-height: 1.25; }
+.modal h2, .palette h2 { font-size: var(--type-subheading); font-weight: var(--weight-heading); }
+.rr-resource-cover b, .rx-persona h3 { font-size: var(--type-subheading); line-height: 1.3; font-weight: var(--weight-heading); }
+.rr-resource-cover b { overflow-wrap: anywhere; }
+.ref-planner-quote, .ref-planner-quote em, blockquote, .quote, .review-prompt, .rx-flashcard strong {
+  font-family: var(--font-sans); font-size: var(--type-subheading); font-weight: var(--weight-body); line-height: 1.5; letter-spacing: 0;
+}
+.recharts-default-tooltip, .recharts-tooltip-label, .recharts-tooltip-item,
+.recharts-legend-item-text { font-weight: var(--weight-body); line-height: 1.5; letter-spacing: 0; }
+.rr-task-table, .rx-task-table, .rr-panel table, .ref-history-table { font-variant-numeric: lining-nums tabular-nums; }
+@media (max-width: 760px) {
+  :root { --type-title: 1.75rem; --type-metric: 1.5rem; }
+  .landing h1 { font-size: 2.5rem !important; }
+  .auth h1, .onboard-side h1 { font-size: 2.25rem !important; }
+  .focus-ring strong, .rx-focus .focus-ring strong { font-size: 2.75rem; }
+  .ref-planner-quote, .ref-planner-quote em { font-size: var(--type-section); }
+}
+
+nav button { font-weight: var(--weight-label); }
+
+/* Allow the wider sans-serif headline to wrap within the existing hero column. */
+.landing h1, .landing h1 em { white-space: normal; overflow-wrap: break-word; }
+.landing h2 { font-size: clamp(1.5rem, 2.5vw, 2rem) !important; line-height: 1.25; }.landing h2, .landing h2 em { white-space: normal; overflow-wrap: break-word; }

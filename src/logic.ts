@@ -1,0 +1,81 @@
+import type {LearningState} from './curriculum';
+
+export type Subject={id:string;name:string;confidence:number;topics:Topic[]};
+export type Topic={id:string;name:string;mastery:number;reviews:number;lastReview?:string;interval:number;prerequisite?:string;previousQuizScore?:number;estimatedRetention?:number;nextReview?:string};
+export type Task={id:string;title:string;subjectId:string;due:string;priority:'High'|'Medium'|'Low';category:string;done:boolean;created:string;status?:'completed'|'pending'|'in-progress';completedAt?:string};
+export type Session={id:string;subjectId:string;topicId?:string;title:string;start:string;minutes:number;done:boolean;status?:'completed'|'missed'|'incomplete'|'planned'};
+export type Exam={id:string;title:string;subjectId:string;date:string;syllabusTopicIds?:string[];revisionStatus?:string};
+export type Event={id:string;at:string;kind:string;title:string;detail:string};
+export type Decision={id:string;at:string;scenario:string;reason:string;before:Session[];after:Session[];status:'accepted'|'rejected'|'proposed'|'completed';trigger?:string;observedData?:Record<string,unknown>;eventType?:string;recommendedAction?:string};
+export type Quiz={id:string;subjectId:string;topicId:string;at:string;total:number;correct:number;incorrect:number;score:number};
+export type Revision={id:string;subjectId:string;topicId:string;at:string;rating:string;interval:number;previousQuizScore:number;estimatedRetention:number;nextReview:string};
+export type Data={
+ learning?:LearningState;
+ quizzes?:Quiz[];
+ revisions?:Revision[];
+ achievements?:{id:string;title:string;earnedAt:string;sessionId?:string}[];
+ demo?:{version:number;start:string;end:string;timeZone:string};
+ student:{name:string;level:string;course:string;college:string;year:string;goal:string;onboarded:boolean};
+ subjects:Subject[];tasks:Task[];sessions:Session[];exams:Exam[];events:Event[];decisions:Decision[];
+ settings:{dailyHours:number;sessionMinutes:number;breakMinutes:number;preferredTime:string;theme:string;view:string;reminders:boolean;language:string;timeZone:string;dateFormat:string;fontSize:string;density:string;weekStart:string;backgroundStyle:string};
+ focus:{end:number|null;remaining:number;running:boolean;subjectId:string;taskId:string;objective:string};
+};
+
+export const uid=()=>Math.random().toString(36).slice(2,10);
+export const day=(offset=0)=>{const d=new Date();d.setDate(d.getDate()+offset);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+export const seed:Data={
+ student:{name:'Alex Morgan',level:'Undergraduate',course:'Computer Science',college:'',year:'2',goal:'Build a consistent study routine',onboarded:false},
+ subjects:[
+  {id:'math',name:'Mathematics',confidence:62,topics:[{id:'calculus',name:'Calculus',mastery:52,reviews:0,interval:1},{id:'algebra',name:'Linear algebra',mastery:72,reviews:0,interval:1,prerequisite:'calculus'}]},
+  {id:'cs',name:'Computer Science',confidence:76,topics:[{id:'algorithms',name:'Algorithms',mastery:68,reviews:0,interval:1},{id:'structures',name:'Data structures',mastery:79,reviews:0,interval:1,prerequisite:'algorithms'}]},
+  {id:'physics',name:'Physics',confidence:58,topics:[{id:'mechanics',name:'Mechanics',mastery:55,reviews:0,interval:1},{id:'waves',name:'Waves',mastery:60,reviews:0,interval:1,prerequisite:'mechanics'}]},
+ ],
+ tasks:[{id:'t1',title:'Complete calculus problem set',subjectId:'math',due:day(2),priority:'High',category:'Assignment',done:false,created:new Date().toISOString()},{id:'t2',title:'Review data structures notes',subjectId:'cs',due:day(4),priority:'Medium',category:'Revision',done:false,created:new Date().toISOString()}],
+ sessions:[],exams:[{id:'e1',title:'Mathematics midterm',subjectId:'math',date:day(18)},{id:'e2',title:'Physics assessment',subjectId:'physics',date:day(27)}],events:[],decisions:[],
+ settings:{dailyHours:3,sessionMinutes:50,breakMinutes:10,preferredTime:'09:00',theme:'light',view:'Week',reminders:true,language:'English',timeZone:'Asia/Kolkata',dateFormat:'DD/MM/YYYY',fontSize:'Medium',density:'Comfortable',weekStart:'Monday',backgroundStyle:'Default'},
+ focus:{end:null,remaining:1500,running:false,subjectId:'math',taskId:'',objective:''},
+};
+
+export const subjectName=(d:Data,id:string)=>d.subjects.find(s=>s.id===id)?.name||'General';
+export const hours=(d:Data)=>d.sessions.filter(s=>s.done).reduce((a,s)=>a+s.minutes,0)/60;
+export const mastery=(d:Data)=>Math.round(d.subjects.flatMap(s=>s.topics).reduce((a,t)=>a+t.mastery,0)/Math.max(1,d.subjects.flatMap(s=>s.topics).length));
+export const dueReviews=(d:Data)=>d.subjects.flatMap(s=>s.topics.map(t=>({...t,subjectId:s.id}))).filter(t=>!t.lastReview||new Date(t.lastReview).getTime()+t.interval*86400000<=Date.now());
+export const retention=(t:Topic)=>Math.round(Math.max(5,Math.min(100,t.mastery*Math.exp(-Math.max(0,Date.now()-new Date(t.lastReview||day(-3)).getTime())/86400000/Math.max(1,t.interval*2)))));
+
+export const nextSlot=(sessions:Session[],date:string,preferred:string,minutes:number,breakMinutes:number)=>{
+ let start=new Date(`${date}T${preferred}:00`).getTime();
+ const same=sessions.filter(s=>s.start.slice(0,10)===date).sort((a,b)=>a.start.localeCompare(b.start));
+ for(const s of same){const a=new Date(s.start).getTime(),b=a+s.minutes*60000;if(start+minutes*60000>a&&start<b+breakMinutes*60000)start=b+breakMinutes*60000}
+ return new Date(start).toISOString();
+};
+
+export function generatePlan(d:Data,scenario='',hoursOverride?:number):Session[]{
+ const now=new Date(),existing=d.sessions.filter(s=>s.done||new Date(s.start)<now),result=[...existing];
+ const dailyHours=Math.max(1,hoursOverride??d.settings.dailyHours);
+ const candidate=d.subjects.flatMap(s=>s.topics.map(t=>({subject:s,topic:t,score:100-t.mastery+(d.exams.some(e=>e.subjectId===s.id&&new Date(e.date).getTime()-Date.now()<14*86400000)?25:0)+(d.tasks.some(x=>x.subjectId===s.id&&!x.done&&x.priority==='High')?15:0)}))).sort((a,b)=>b.score-a.score);
+ if(!candidate.length)return result;
+ for(let i=0;i<7;i++){
+  const date=day(i);let used=0,index=i;
+  while(used+d.settings.sessionMinutes<=dailyHours*60){
+   const c=candidate[index%candidate.length],start=nextSlot(result,date,d.settings.preferredTime,d.settings.sessionMinutes,d.settings.breakMinutes);
+   if(new Date(start).getHours()>=22)break;
+   result.push({id:uid(),subjectId:c.subject.id,topicId:c.topic.id,title:`Study ${c.topic.name}`,start,minutes:d.settings.sessionMinutes,done:false});
+   used+=d.settings.sessionMinutes+d.settings.breakMinutes;index++;
+  }
+ }
+ if(scenario==='Missed study session'){const missed=result.findIndex(s=>!s.done);if(missed>=0)result.splice(missed,1)}
+ return result;
+}
+
+export const validatePlan=(sessions:Session[])=>sessions.every((s,i)=>sessions.every((x,j)=>i===j||new Date(s.start).getTime()+s.minutes*60000<=new Date(x.start).getTime()||new Date(x.start).getTime()+x.minutes*60000<=new Date(s.start).getTime()));
+export const readiness=(d:Data,subjectId:string)=>{const s=d.subjects.find(x=>x.id===subjectId);if(!s)return 0;const mean=s.topics.reduce((a,t)=>a+t.mastery,0)/Math.max(1,s.topics.length),covered=s.topics.filter(t=>t.reviews>0).length/Math.max(1,s.topics.length)*100;return Math.round(mean*.75+covered*.25)};
+export const quizAccuracy=(d:Data,subjectId?:string)=>{const q=(d.quizzes||[]).filter(q=>!subjectId||q.subjectId===subjectId);return q.length?100*q.reduce((a,q)=>a+q.correct,0)/q.reduce((a,q)=>a+q.total,0):null};
+export const studyStreak=(d:Data)=>{const dates=new Set(d.sessions.filter(s=>s.done).map(s=>s.start.slice(0,10)));let n=0,i=dates.has(day())?0:1;while(dates.has(day(-i))){n++;i++}return n};
+
+export function recordTopicReview(d:Data,topicId:string,rating:string):Data{
+ const subject=d.subjects.find(s=>s.topics.some(t=>t.id===topicId)),topic=subject?.topics.find(t=>t.id===topicId);if(!subject||!topic)return d;
+ const intervals:Record<string,number>={Again:1,Hard:2,Good:4,Easy:7},gain:Record<string,number>={Again:-8,Hard:1,Good:4,Easy:7};if(!intervals[rating])return d;
+ const interval=intervals[rating]*(topic.reviews+1),at=new Date().toISOString(),nextReview=new Date(Date.now()+interval*86400000).toISOString().slice(0,10),score=(d.quizzes||[]).filter(q=>q.topicId===topicId).slice(-1)[0]?.score||0;
+ const updated={...topic,lastReview:at,reviews:topic.reviews+1,interval,nextReview,mastery:Math.max(0,Math.min(100,topic.mastery+gain[rating]))};
+ return {...d,subjects:d.subjects.map(s=>({...s,topics:s.topics.map(t=>t.id===topicId?updated:t)})),revisions:[...(d.revisions||[]),{id:uid(),subjectId:subject.id,topicId,at,rating,interval,previousQuizScore:score,estimatedRetention:retention(updated),nextReview}]};
+}
